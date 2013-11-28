@@ -1,0 +1,29 @@
+title: Checks any amount of mysql status vars
+agents: linux
+author: Bastian Kuhn <mail@bastian-kuhn.de>
+license: GPL
+distribution: none 
+description:
+ This check keeps an eye of every mysql status value you configured.
+ HINT: Setup the mysql command at the agent plugin
+
+item:
+ The name of each mysql status value as shown in the mysql SHOW STATUS; query
+
+inventory:
+ Automatic inventory is supported. You just have to configure which
+ status values you like to monitor
+ 
+examples:
+ mysql_status_vars = [
+   ( "Aborted_clients", 300, 400),
+   ( "Created_tmp_files", None, None),
+  ]
+
+[configuration]
+mysql_status_vars (list): A list of tuples with three parameters.
+
+[parameters]
+var_name (string): Name of mysql status var
+warn (int): Warning level
+crit (int): Critical level

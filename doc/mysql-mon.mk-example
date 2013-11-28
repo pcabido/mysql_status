@@ -1,0 +1,34 @@
+    
+# These values are not tuned by a MySQL specialist, you will find you will
+# need to adjust them for your use!
+    
+# Only load settings if that plugin is available.
+if "mysql_status" in inventorable_checktypes("all"):
+    mysql_status_vars = [
+         ( "Innodb_os_log_pending_fsyncs",          5, 10),
+         ( "Innodb_data_pending_fsyncs",          50, 100),
+         ( "Innodb_buffer_pool_pages_free",    None, None),
+         ( "Innodb_buffer_pool_pages_dirty",       20, 40),
+         ( "Innodb_buffer_pool_pages_total",   None, None),
+         ( "Innodb_row_lock_current_waits",         5, 10),
+         ( "Innodb_row_lock_time_avg",         None, None),
+         ( "Innodb_row_lock_time_max",         None, None),
+         ( "Created_tmp_files",                None, None),
+         ( "Open_files",                         250, 2000),
+         ( "Table_locks_waited",                 100, 500),
+         ( "Slow_queries",                          5, 10),
+         ( "Slow_launch_threads",                   5, 10),
+         # Ohmygosh
+         # Warnung wenn weniger als 32MB frei
+         # Critical wenn weniger als 10MB frei
+         ( "Qcache_free_memory",               32*1024*1024, 10*1024*1024),
+         ( "Qcache_hits",                      None, None),
+         ( "Qcache_not_cached",                None, None),
+         ( "Aborted_clients",                      10, 20),
+         ( "Aborted_connects",                   909, 500),
+         ( "Bytes_received",                   None, None),
+         ( "Bytes_sent",                1*1024*1024, 10*1024*1024),
+         ( "Compression",                      "ON", None),
+         ( "Slave_running",                    "ON", "ON"),
+         ( "Queries", 			   None, None),
+    ]
