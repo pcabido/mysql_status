@@ -10,7 +10,7 @@
 # |        | )___) )_   |  /  \ \| (___) || )   ( || )  \  |        |
 # |        |/ \___/(_)  |_/    \/(_______)|/     \||/    )_)        |
 # |                                                                 |
-# | Copyright Bastian Kuhn 2011                mail@bastian-kuhn.de | 
+# | Copyright Bastian Kuhn 2011                mail@bastian-kuhn.de |
 # +-----------------------------------------------------------------+
 #
 # This file is a check Script for check_mk
@@ -43,7 +43,7 @@
 mysql_status_vars = []
 
 # No need to list Gauge type -  assumed per default
-# If you add a counter/bool to your .mk file, make sure it 
+# If you add a counter/bool to your .mk file, make sure it
 # is known in here
 mysql_status_types = {
     "Aborted_clients"                : "Counter",
@@ -62,23 +62,46 @@ mysql_status_types = {
     "Slave_retried_transactions"     : "Counter",
     "Slave_running"                  : "Boolean",
     "Queries"                        : "Counter",
-    "Created_tmp_disk_tables"        : "Counter", 
+    "Created_tmp_disk_tables"        : "Counter",
     "Created_tmp_tables"             : "Counter",
-    "Slave_retried_transactions"     : "Counter", 
+    "Slave_retried_transactions"     : "Counter",
     "Slave_running"                  : "Boolean",
+    "wsrep_replicated"               : "Counter",
+    "wsrep_replicated_bytes"         : "Counter",
+    "wsrep_received"                 : "Counter",
+    "wsrep_received_bytes"           : "Counter",
+    "wsrep_local_commits"            : "Counter",
+    "wsrep_local_cert_failures"      : "Counter",
+    "wsrep_local_bf_aborts"          : "Counter",
+    "wsrep_local_send_queue"         : "Counter",
+    "wsrep_local_send_queue_avg"     : "Counter",
+    "wsrep_local_recv_queue"         : "Counter",
+    "wsrep_local_recv_queue_avg"     : "Counter",
+    "wsrep_flow_control_paused"      : "Counter",
+    "wsrep_flow_control_sent"        : "Counter",
+    "wsrep_flow_control_recv"        : "Counter",
+    "wsrep_cert_deps_distance"       : "Counter",
+    "wsrep_apply_window"             : "Counter",
+    "wsrep_commit_oooe"              : "Counter",
+    "wsrep_commit_oool"              : "Counter",
+    "wsrep_commit_window"            : "Counter",
+    "wsrep_cert_index_size"          : "Counter",
+    "wsrep_causal_reads"             : "Counter",
+    "wsrep_connected"                : "Boolean",
+    "wsrep_cluster_size"             : "Counter",
 }
 
 
-# Since the global status output doesn't tell you, 
+# Since the global status output doesn't tell you,
 # we have another list of values where a high gauge is
 # good.
-negative_values = [ 
+negative_values = [
     "Qcache_free_memory",
-    "Innodb_buffer_pool_pages_free", 
-    "Qcache_free_blocks" 
+    "Innodb_buffer_pool_pages_free",
+    "Qcache_free_blocks"
 ]
 
- 
+
 
 
 def inventory_mysql_status(checkname, info):
@@ -109,13 +132,16 @@ def check_mysql_status(item, params, info):
                this_time = time.time()
                warn, crit = params
                counter_wrapped = None
-               value = saveint(line[1])
+               if isinstance(line[1], int):
+                   value = saveint(line[1])
+               else:
+                   value = savefloat(line[1])
                try:
                    timedif, items_per_sec = get_counter("mysql_status." + item, this_time, value)
                    perfdata.append (( item, "%d" % value ))
                    output = ("rate is %d/s") % items_per_sec
                except MKCounterWrapped, e:
-                   counter_wrapped = e 
+                   counter_wrapped = e
                    continue
 
                changed = items_per_sec * timedif
@@ -132,22 +158,21 @@ def check_mysql_status(item, params, info):
                        state = 0
                return (state, "%s - "% nagios_state_names[state] + output, perfdata)
 
-
            elif vartype == "Boolean":
                # MySQL knows OFF and ON
                value = line[1]
                warn, crit = params
                output = ("%s is %s") % (item, value)
                if crit != "None" or warn != "None":
-                   if   value == crit: 
+                   if   value == crit:
                        state = 2
                        return (2, "CRITICAL - %s is %s!!"   % (item, value))
-                   elif value == warn: 
-                       state = 1 
+                   elif value == warn:
+                       state = 1
                        return (1, "WARN - %s is %s!"        % (item, value))
                state = 0
                return (0, "OK - %s is %s" % (item, value))
-                  
+
 
            elif vartype == "Gauge":
                warn, crit = params
@@ -170,14 +195,14 @@ def check_mysql_status(item, params, info):
                        state = 1
                    else:
                        state = 0
- 
+
                perfdata.append (( item, "%d" % value ))
                return (state, "%s - "% nagios_state_names[state] + output, perfdata)
 
 
    # Pass on info for the web interface
    # if we tripped over a uninitialized counter
-   if counter_wrapped: 
+   if counter_wrapped:
        raise counter_wrapped
 
 
